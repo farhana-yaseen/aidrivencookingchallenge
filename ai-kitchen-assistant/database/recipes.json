@@ -1,0 +1,19 @@
+[
+    {
+        "title": "Any None Delight with chicken, egg, nodles",
+        "servings": 4,
+        "ingredients": {
+            "main ingredient (e.g., chicken, tofu)": "400.0g",
+            "vegetable (e.g., broccoli, bell pepper)": "200.0g",
+            "carb (e.g., rice, pasta)": "300.0g",
+            "sauce/spice (e.g., soy sauce, curry powder)": "4.0tbsp",
+            "chicken": "400.0g"
+        },
+        "instructions": [
+            "Prepare the ingredients.",
+            "Cook the main ingredient until browned.",
+            "Add vegetables and cook until tender.",
+            "Serve over your carb of choice, with the sauce."
+        ]
+    }
+]
