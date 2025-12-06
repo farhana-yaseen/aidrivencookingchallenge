@@ -15,5 +15,22 @@
             "Add vegetables and cook until tender.",
             "Serve over your carb of choice, with the sauce."
         ]
+    },
+    {
+        "title": "Italian None Delight with meat, rice, egg",
+        "servings": 3,
+        "ingredients": {
+            "main ingredient (e.g., chicken, tofu)": "300.0g",
+            "vegetable (e.g., broccoli, bell pepper)": "150.0g",
+            "carb (e.g., rice, pasta)": "225.0g",
+            "sauce/spice (e.g., soy sauce, curry powder)": "3.0tbsp",
+            "meat": "300.0g"
+        },
+        "instructions": [
+            "Prepare the ingredients.",
+            "Cook the main ingredient until browned.",
+            "Add vegetables and cook until tender.",
+            "Serve over your carb of choice, with the sauce."
+        ]
     }
 ]

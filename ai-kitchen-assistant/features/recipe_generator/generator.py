@@ -4,6 +4,7 @@ import questionary
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
+import streamlit as st
 
 console = Console()
 
@@ -36,7 +37,7 @@ def generate_ai_recipe(ingredients, diet, cuisine):
     
     return base_recipe
 
-def suggest_substitutions(missing_ingredients):
+def suggest_substitutions_streamlit(missing_ingredients):
     """Suggests substitutions for missing ingredients."""
     # Dummy substitution logic
     substitutions = {
@@ -47,10 +48,11 @@ def suggest_substitutions(missing_ingredients):
     suggestions_text = []
     for item in missing_ingredients:
         if item.lower() in substitutions:
-            suggestions_text.append(f"For [bold red]{item}[/bold red], you could use [bold green]{substitutions[item.lower()]}[/bold green].")
+            suggestions_text.append(f"For {item}, you could use {substitutions[item.lower()]}.")
     
     if suggestions_text:
-        console.print(Panel("\n".join(suggestions_text), title="[yellow]Substitution Suggestions[/yellow]"))
+        st.subheader("Substitution Suggestions")
+        st.write("\n".join(suggestions_text))
 
 
 def adjust_serving_size(recipe, new_servings):
@@ -76,7 +78,97 @@ def adjust_serving_size(recipe, new_servings):
     recipe["servings"] = new_servings
     return recipe
 
-def display_recipe(recipe):
+def display_recipe_streamlit(recipe):
+    """Displays a recipe using Streamlit."""
+    st.title(recipe['title'])
+    st.write(f"Serves {recipe['servings']}")
+    
+    st.subheader("Ingredients")
+    ingredients_data = {"Ingredient": [], "Amount": []}
+    for ingredient, amount in recipe["ingredients"].items():
+        ingredients_data["Ingredient"].append(ingredient)
+        ingredients_data["Amount"].append(amount)
+    st.table(ingredients_data)
+    
+    st.subheader("Instructions")
+    for i, step in enumerate(recipe["instructions"]):
+        st.write(f"{i+1}. {step}")
+
+def save_recipe_streamlit(recipe):
+    """Saves the recipe to a JSON file."""
+    try:
+        with open("ai-kitchen-assistant/database/recipes.json", "r+") as f:
+            try:
+                recipes = json.load(f)
+            except json.JSONDecodeError:
+                recipes = []
+            recipes.append(recipe)
+            f.seek(0)
+            json.dump(recipes, f, indent=4)
+    except FileNotFoundError:
+        with open("ai-kitchen-assistant/database/recipes.json", "w") as f:
+            json.dump([recipe], f, indent=4)
+    st.success("Recipe saved successfully!")
+
+def recipe_generator_page():
+    """Main function for the recipe generator feature."""
+    st.header("AI Recipe Generator")
+    
+    ingredients_str = st.text_input("What ingredients do you have? (comma-separated)")
+    ingredients = [i.strip() for i in ingredients_str.split(',')] if ingredients_str else []
+    
+    diet = st.selectbox(
+        "Any dietary preference?",
+        ["None", "Vegan", "Keto", "Low Sodium", "Gluten-Free"]
+    )
+    
+    cuisine = st.text_input("What cuisine would you like? (e.g., Italian, Mexican)", "Any")
+    
+    if st.button("Generate Recipe"):
+        if not ingredients:
+            st.warning("Please enter at least one ingredient.")
+            return
+
+        st.write("Generating a recipe for you...")
+        recipe = generate_ai_recipe(ingredients, diet, cuisine)
+        
+        st.session_state.recipe = recipe
+        
+    if 'recipe' in st.session_state:
+        recipe = st.session_state.recipe
+        new_servings = st.number_input(f"The recipe is for {recipe['servings']} servings. How many would you like?", min_value=1, value=recipe['servings'])
+        
+        if new_servings != recipe['servings']:
+            recipe = adjust_serving_size(recipe, new_servings)
+            st.session_state.recipe = recipe
+
+        display_recipe_streamlit(recipe)
+
+        missing = st.text_input("Are you missing any common ingredients for this? (e.g., chicken, olive oil)")
+        if missing:
+            suggest_substitutions_streamlit([i.strip() for i in missing.split(',')])
+
+        if st.button("Save Recipe"):
+            save_recipe_streamlit(recipe)
+
+# CLI functions
+def suggest_substitutions_cli(missing_ingredients):
+    """Suggests substitutions for missing ingredients."""
+    # Dummy substitution logic
+    substitutions = {
+        "chicken": "tofu or chickpeas",
+        "rice": "quinoa or couscous",
+        "olive oil": "butter or coconut oil"
+    }
+    suggestions_text = []
+    for item in missing_ingredients:
+        if item.lower() in substitutions:
+            suggestions_text.append(f"For [bold red]{item}[/bold red], you could use [bold green]{substitutions[item.lower()]}[/bold green].")
+    
+    if suggestions_text:
+        console.print(Panel("\n".join(suggestions_text), title="[yellow]Substitution Suggestions[/yellow]"))
+
+def display_recipe_cli(recipe):
     """Displays a recipe using Rich."""
     panel_content = f"[bold cyan]{recipe['title']}[/bold cyan]\n[italic]Serves {recipe['servings']}[/italic]\n"
     
@@ -94,7 +186,7 @@ def display_recipe(recipe):
     console.print(ingredients_table)
     console.print(instructions_text)
 
-def save_recipe(recipe):
+def save_recipe_cli(recipe):
     """Saves the recipe to a JSON file."""
     try:
         with open("database/recipes.json", "r+") as f:
@@ -134,17 +226,17 @@ def recipe_generator_main():
     except ValueError:
         console.print("[red]Invalid number, keeping original serving size.[/red]")
 
-    display_recipe(recipe)
+    display_recipe_cli(recipe)
 
     # Substitution suggestion (mock)
     if random.choice([True, False]): # Randomly decide to show substitution
         missing = questionary.text("Are you missing any common ingredients for this? (e.g., chicken, olive oil)").ask()
         if missing:
-            suggest_substitutions([i.strip() for i in missing.split(',')])
+            suggest_substitutions_cli([i.strip() for i in missing.split(',')])
 
     # Save recipe
     if questionary.confirm("Do you want to save this recipe?").ask():
-        save_recipe(recipe)
+        save_recipe_cli(recipe)
 
 if __name__ == "__main__":
     recipe_generator_main()

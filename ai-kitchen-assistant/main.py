@@ -17,18 +17,26 @@ def kitchen_companion_main():
     console.print("[bold green]Welcome to your AI Kitchen Companion![/bold green]")
 
     while True:
-        choice = questionary.select(
-            "What would you like to do?",
-            choices=[
-                "Generate a Recipe",
-                "Plan Weekly Meals",
-                "Get Cooking Guidance",
-                "Find Flavor Pairings",
-                "Analyze Recipe Health",
-                "Start a Cooking Challenge",
-                "Exit"
-            ]
-        ).ask()
+        try:
+            choice = questionary.select(
+                "What would you like to do?",
+                choices=[
+                    "Generate a Recipe",
+                    "Plan Weekly Meals",
+                    "Get Cooking Guidance",
+                    "Find Flavor Pairings",
+                    "Analyze Recipe Health",
+                    "Start a Cooking Challenge",
+                    "Exit"
+                ]
+            ).ask()
+        except KeyboardInterrupt:
+            console.print("[bold blue]\nGoodbye! Happy cooking![/bold blue]")
+            break
+
+        if choice is None: # Handle Ctrl+C from the menu
+            console.print("[bold blue]Goodbye! Happy cooking![/bold blue]")
+            break
 
         if choice == "Generate a Recipe":
             recipe_generator_main()

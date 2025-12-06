@@ -44,10 +44,12 @@ def flavor_pairing_main():
     ))
 
     while True:
-        ingredient = questionary.text(
-            "Enter an ingredient (or press Enter to exit):",
-            autocomplete=list(PAIRING_DATA.keys())
-        ).ask()
+        try:
+            ingredient = questionary.text(
+                "Enter an ingredient (or press Enter to exit):"
+            ).ask()
+        except KeyboardInterrupt:
+            break
 
         if not ingredient:
             console.print("[yellow]Exiting Flavor Pairing AI. Happy cooking![/yellow]")
